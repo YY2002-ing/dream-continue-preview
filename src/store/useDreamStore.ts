@@ -4,78 +4,37 @@ import { mockDreams, mockDrafts, mockUser } from '../utils/mock';
 import { generateId, delay } from '../utils/helpers';
 import { highQualityScripts } from '../services/aiService';
 
-const presetImages = {
-  forest: [
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1280&h=720&fit=crop',
-  ],
-  ocean: [
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1280&h=720&fit=crop',
-  ],
-  sky: [
-    'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1280&h=720&fit=crop',
-  ],
-  city: [
-    'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=1280&h=720&fit=crop',
-  ],
-  school: [
-    'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1280&h=720&fit=crop',
-  ],
-  house: [
-    'https://images.unsplash.com/photo-1514306191717-452242a6025e?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1280&h=720&fit=crop',
-  ],
-  train: [
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1546484959-ba64b0756a1e?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1534224038622-77e907024173?w=1280&h=720&fit=crop',
-  ],
-  office: [
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1280&h=720&fit=crop',
-    'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1280&h=720&fit=crop',
-  ],
+const IMG_BASE = `${import.meta.env.BASE_URL}images/`;
+
+const scriptImages: Record<string, string[]> = {
+  office: ['script-office-1', 'script-office-2', 'script-office-3', 'script-office-4'],
+  forest: ['script-forest-1', 'script-forest-2', 'script-forest-3', 'scene-3-3'],
+  school: ['script-school-1', 'script-school-2', 'script-school-3', 'script-school-4'],
+  ocean: ['scene-2-1', 'scene-2-2', 'scene-2-3', 'script-office-4'],
+  sky: ['script-sky-1', 'script-sky-2', 'script-sky-1', 'script-office-4'],
+  house: ['script-house-1', 'script-house-2', 'script-house-3', 'script-office-4'],
+  train: ['script-train-1', 'script-train-2', 'script-train-3', 'script-office-4'],
 };
 
 const getImageByKeyword = (content: string, index: number): string => {
-  if (content.includes('森林') || content.includes('树') || content.includes(' woods')) {
-    return presetImages.forest[index % presetImages.forest.length];
+  let key = 'forest';
+  if (content.includes('办公室') || content.includes('工作') || content.includes('同事') || content.includes('电脑')) {
+    key = 'office';
+  } else if (content.includes('森林') || content.includes('树') || content.includes('鹿')) {
+    key = 'forest';
+  } else if (content.includes('学校') || content.includes('教室') || content.includes('同学') || content.includes('老师')) {
+    key = 'school';
+  } else if (content.includes('海') || content.includes('水') || content.includes('鱼') || content.includes('鲸')) {
+    key = 'ocean';
+  } else if (content.includes('飞') || content.includes('云') || content.includes('天空')) {
+    key = 'sky';
+  } else if (content.includes('房子') || content.includes('家') || content.includes('奶奶') || content.includes('老')) {
+    key = 'house';
+  } else if (content.includes('火车') || content.includes('列车') || content.includes('车站') || content.includes('地铁')) {
+    key = 'train';
   }
-  if (content.includes('海') || content.includes('水') || content.includes('鱼') || content.includes('鲸')) {
-    return presetImages.ocean[index % presetImages.ocean.length];
-  }
-  if (content.includes('飞') || content.includes('云') || content.includes('天空') || content.includes('城')) {
-    return presetImages.sky[index % presetImages.sky.length];
-  }
-  if (content.includes('办公室') || content.includes('工作') || content.includes('电脑')) {
-    return presetImages.office[index % presetImages.office.length];
-  }
-  if (content.includes('学校') || content.includes('教室') || content.includes('校园')) {
-    return presetImages.school[index % presetImages.school.length];
-  }
-  if (content.includes('房子') || content.includes('家') || content.includes('老')) {
-    return presetImages.house[index % presetImages.house.length];
-  }
-  if (content.includes('火车') || content.includes('列车') || content.includes('车站')) {
-    return presetImages.train[index % presetImages.train.length];
-  }
-  if (content.includes('城市') || content.includes('街道') || content.includes('建筑')) {
-    return presetImages.city[index % presetImages.city.length];
-  }
-  
-  const keys = Object.keys(presetImages) as (keyof typeof presetImages)[];
-  const randomKey = keys[Math.floor(Math.random() * keys.length)];
-  return presetImages[randomKey][index % presetImages[randomKey].length];
+  const images = scriptImages[key];
+  return `${IMG_BASE}${images[index % images.length]}.jpg`;
 };
 
 interface DreamState {
