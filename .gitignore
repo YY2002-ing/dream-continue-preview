@@ -1,6 +1,4 @@
 node_modules
-dist
 .vite
 .DS_Store
-dream-continue-preview/
 *.local
